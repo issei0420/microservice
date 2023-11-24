@@ -23,11 +23,17 @@ import (
 	_ "k8s.io/component-base/logs/json/register" // for JSON log format registration
 	_ "k8s.io/component-base/metrics/prometheus/clientgo"
 	_ "k8s.io/component-base/metrics/prometheus/version" // for version metric registration
+	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
+	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/myprefilter"
 )
 
 func main() {
-	command := app.NewSchedulerCommand()
+	klog.Infof("999999999\n")
+	command := app.NewSchedulerCommand(
+		app.WithPlugin("MyPreFilterPlugin", myprefilter.New),
+	)
+	klog.Infof("99999999\n")
 	code := cli.Run(command)
 	os.Exit(code)
 }

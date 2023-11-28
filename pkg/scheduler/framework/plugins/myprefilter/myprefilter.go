@@ -2,6 +2,8 @@ package myprefilter
 
 import (
 	"context"
+	"io/ioutil"
+	"net/http"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -32,6 +34,27 @@ func (pl *MyPreFilterPlugin) PreFilter(ctx context.Context, state *framework.Cyc
 	}
 	// ここに必要なロジックを実装します。
 	// この例では、特に PreFilterResult を変更する必要はないので nil を返します。
+
+	// api通信
+	// Prometheus サービスへのクエリを実行
+	queryURL := "http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query?query=up"
+	resp, err := http.Get(queryURL)
+	if err != nil {
+		// HTTP エラーをハンドル
+		return nil, framework.NewStatus(framework.Error, err.Error())
+	}
+	defer resp.Body.Close()
+
+	// レスポンスの内容を読み込む
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		// 読み込みエラーをハンドル
+		return nil, framework.NewStatus(framework.Error, err.Error())
+	}
+
+	// 応答をログに出力
+	klog.Info(string(body))
+
 	return nil, framework.NewStatus(framework.Success, "")
 }
 

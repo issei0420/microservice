@@ -29,11 +29,10 @@ import (
 )
 
 func main() {
-	klog.Infof("1212121212121\n")
+	klog.Infof("---------prefilter API 1----------\n")
 	command := app.NewSchedulerCommand(
 		app.WithPlugin("MyPreFilterPlugin", myprefilter.New),
 	)
-	klog.Infof("121212121212\n")
 	code := cli.Run(command)
 	os.Exit(code)
 }

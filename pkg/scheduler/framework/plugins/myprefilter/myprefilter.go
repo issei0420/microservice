@@ -5,6 +5,7 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 )
 
@@ -21,6 +22,14 @@ func (pl *MyPreFilterPlugin) Name() string {
 
 // PreFilter はプラグインのメインロジックです。
 func (pl *MyPreFilterPlugin) PreFilter(ctx context.Context, state *framework.CycleState, p *v1.Pod) (*framework.PreFilterResult, *framework.Status) {
+	klog.Infof("yah! yah! yah! from myprefilter\n")
+	// ポッドのラベルからサービス名を取得する
+	sn := p.Labels["app"]
+	if sn != "" {
+		klog.Infof("PreFilter called for service: %s", sn)
+	} else {
+		klog.Info("PreFilter called for a pod without an 'app' label")
+	}
 	// ここに必要なロジックを実装します。
 	// この例では、特に PreFilterResult を変更する必要はないので nil を返します。
 	return nil, framework.NewStatus(framework.Success, "")

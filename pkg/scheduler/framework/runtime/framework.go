@@ -1124,6 +1124,13 @@ func (f *frameworkImpl) RunScorePlugins(ctx context.Context, state *framework.Cy
 		return nil, framework.AsStatus(fmt.Errorf("applying score defaultWeights on Score plugins: %w", err))
 	}
 
+	for _, nodeScore := range allNodePluginScores {
+		klog.Infof("Node %v has total score %v", nodeScore.Name, nodeScore.TotalScore)
+		for _, pluginScore := range nodeScore.Scores {
+			klog.Infof("Score from plugin %v: %v, weighted: %v", pluginScore.Name, pluginScore.Score, pluginScore.Score*int64(f.scorePluginWeight[pluginScore.Name]))
+		}
+	}
+
 	return allNodePluginScores, nil
 }
 

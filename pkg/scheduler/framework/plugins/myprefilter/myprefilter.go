@@ -2,7 +2,6 @@ package myprefilter
 
 import (
 	"context"
-	"io/ioutil"
 	"net/http"
 
 	v1 "k8s.io/api/core/v1"
@@ -46,14 +45,14 @@ func (pl *MyPreFilterPlugin) PreFilter(ctx context.Context, state *framework.Cyc
 	defer resp.Body.Close()
 
 	// レスポンスの内容を読み込む
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		// 読み込みエラーをハンドル
-		return nil, framework.NewStatus(framework.Error, err.Error())
-	}
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	// 読み込みエラーをハンドル
+	// 	return nil, framework.NewStatus(framework.Error, err.Error())
+	// }
 
 	// 応答をログに出力
-	klog.Info(string(body))
+	// klog.Info(string(body))
 
 	return nil, framework.NewStatus(framework.Success, "")
 }

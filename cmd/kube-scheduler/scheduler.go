@@ -26,12 +26,14 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/myprefilter"
+	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/myscore"
 )
 
 func main() {
-	klog.Infof("---------prefilter API 1----------\n")
+	klog.Infof("---------MyScorePlugin----------\n")
 	command := app.NewSchedulerCommand(
-		app.WithPlugin("MyPreFilterPlugin", myprefilter.New),
+		app.WithPlugin((&myprefilter.MyPreFilterPlugin{}).Name(), myprefilter.New),
+		app.WithPlugin((&myscore.MyScorePlugin{}).Name(), myscore.New),
 	)
 	code := cli.Run(command)
 	os.Exit(code)

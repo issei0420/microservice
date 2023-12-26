@@ -25,6 +25,7 @@ import (
 	_ "k8s.io/component-base/metrics/prometheus/version" // for version metric registration
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
+	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/myfilter"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/myprefilter"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/myscore"
 )
@@ -34,6 +35,7 @@ func main() {
 	command := app.NewSchedulerCommand(
 		app.WithPlugin((&myprefilter.MyPreFilterPlugin{}).Name(), myprefilter.New),
 		app.WithPlugin((&myscore.MyScorePlugin{}).Name(), myscore.New),
+		app.WithPlugin((&myfilter.MyFilterPlugin{}).Name(), myfilter.New),
 	)
 	code := cli.Run(command)
 	os.Exit(code)

@@ -48,7 +48,7 @@ type PrometheusResponse struct {
 // Score is called on each node. It must return success and an integer
 // indicating the rank of the node. The higher the rank, the better the node.
 func (pl *MyScorePlugin) Score(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (int64, *framework.Status) {
-	klog.Infof("yeah! yeah! yeah! from myscore\n")
+	// klog.Infof("yeah! yeah! yeah! from myscore\n")
 
 	// Pod のサービス名を取得
 	sn := pod.Labels["app"]
@@ -66,7 +66,7 @@ func (pl *MyScorePlugin) Score(ctx context.Context, state *framework.CycleState,
 	queryURL := baseURL + "?query=" + encodedQuery
 
 	// クエリ文字列のログ出力
-	klog.Info("service now on scheduling: ", sn)
+	// klog.Info("service now on scheduling: ", sn)
 
 	// HTTPリクエストの実行
 	resp, err := http.Get(queryURL)
@@ -87,7 +87,7 @@ func (pl *MyScorePlugin) Score(ctx context.Context, state *framework.CycleState,
 	}
 
 	// レスポンスの内容をログに出力
-	klog.Info("Prometheus response: ", string(body))
+	// klog.Info("Prometheus response: ", string(body))
 
 	// Prometheusレスポンスの解析
 	var result PrometheusResponse

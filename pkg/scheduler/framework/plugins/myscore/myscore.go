@@ -59,7 +59,7 @@ func (pl *MyScorePlugin) Score(ctx context.Context, state *framework.CycleState,
 
 	// Prometheus クエリの構築
 	baseURL := "http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query"
-	queryParams := fmt.Sprintf("topk(5, sum(rate(request_total{app=\"%s\", namespace=\"saiki\", dst_service!=\"redis-cart\", dst_service!=\"otel-collector-collector\", dst_service!=\"jaeger\", dst_service!=\"prometheus-kube-prometheus-prometheus\", dst_service!=\"\"}[60m])) by (dst_service) OR sum(rate(request_total{dst_service=\"%s\", namespace=\"saiki\", app!=\"redis-cart\", app!=\"otelcollector\", app!=\"jaeger\", app!=\"\"}[60m])) by (app))", sn, sn)
+	queryParams := fmt.Sprintf("topk(5, sum(rate(request_total{app=\"%s\", namespace=\"saiki\", dst_service!=\"redis-cart\", dst_service!=\"otel-collector-collector\", dst_service!=\"jaeger\", dst_service!=\"prometheus-kube-prometheus-prometheus\", dst_service!=\"\"}[5m])) by (dst_service) OR sum(rate(request_total{dst_service=\"%s\", namespace=\"saiki\", app!=\"redis-cart\", app!=\"otelcollector\", app!=\"jaeger\", app!=\"\"}[5m])) by (app))", sn, sn)
 
 	// クエリ文字列のエンコード
 	encodedQuery := url.QueryEscape(queryParams)
@@ -95,6 +95,12 @@ func (pl *MyScorePlugin) Score(ctx context.Context, state *framework.CycleState,
 		return 0, framework.NewStatus(framework.Error, err.Error())
 	}
 
+	// レスポンスが空の場合、nodeScoreを0として返す
+	if len(result.Data.Result) == 0 {
+		klog.Info("No results found in Prometheus response, returning nodeScore 0")
+		return 0, framework.NewStatus(framework.Success)
+	}
+
 	// サービススコアのマップを作成
 	serviceScores := make(map[string]int64)
 	score := int64(50)
@@ -112,9 +118,10 @@ func (pl *MyScorePlugin) Score(ctx context.Context, state *framework.CycleState,
 		score -= 10
 	}
 
-	if len(serviceScores) == 0 {
-		return 0, framework.NewStatus(framework.Error, "No services found in Prometheus response")
-	}
+	// if len(serviceScores) == 0 {
+	// 	klog.Info("No service found in Prometheus response")
+	// 	return 0, framework.NewStatus(framework.Success)
+	// }
 
 	// マップの内容をログに出力
 	for service, score := range serviceScores {

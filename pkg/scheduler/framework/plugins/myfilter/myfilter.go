@@ -31,7 +31,16 @@ func (pl *MyFilterPlugin) Name() string {
 }
 
 func (f *MyFilterPlugin) Filter(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeInfo *framework.NodeInfo) *framework.Status {
-	// klog.Infof("hello hello hello from myfilter\n")
+	// 特定のノードIPアドレス
+	specificNodeIP := "192.168.100.30"
+
+	// ノードのIPアドレスを取得
+	nodeIP := nodeInfo.Node().Status.Addresses[0].Address
+	klog.Info("########################################")
+	klog.Infof("Filtering on node: %s", nodeIP)
+	if nodeIP == specificNodeIP {
+		return framework.NewStatus(framework.UnschedulableAndUnresolvable, fmt.Sprintf("Node with IP %s is unschedulable", specificNodeIP))
+	}
 
 	// 環境変数からCPU使用率のリミット値を取得
 	cpuLimitStr := os.Getenv("CPU_USAGE_LIMIT")
@@ -85,6 +94,21 @@ func (f *MyFilterPlugin) Filter(ctx context.Context, state *framework.CycleState
 	} else {
 		klog.Infof("no result: %s\n", nodeInfo.Node().Status.Addresses[0].Address)
 	}
+
+	// スケジューリングしようとしているポッドのサービス名を取得
+	// serviceName := pod.Labels["app"]
+	// if serviceName == "" {
+	// 	klog.Info("Pod does not have an 'app' label")
+	// 	return framework.NewStatus(framework.Success)
+	// }
+
+	// 対象ノード上のポッドを確認
+	// for _, p := range nodeInfo.Pods {
+	// 	if p.Pod.Labels["app"] == serviceName {
+	// 		// 同じサービス名のポッドが既にノード上に存在する場合
+	// 		return framework.NewStatus(framework.UnschedulableAndUnresolvable, "Node already has a pod with the same service name")
+	// 	}
+	// }
 
 	return framework.NewStatus(framework.Success)
 }

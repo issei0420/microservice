@@ -111,6 +111,30 @@ func (f *MyFilterPlugin) Filter(ctx context.Context, state *framework.CycleState
 	// 	}
 	// }
 
+	// 環境変数からポッド数のリミット値を取得
+	podLimitStr := os.Getenv("POD_LIMIT")
+	if podLimitStr == "" {
+		podLimitStr = "5" // デフォルト値
+	}
+	podLimit, err := strconv.Atoi(podLimitStr)
+	if err != nil {
+		return framework.NewStatus(framework.Error, fmt.Sprintf("Invalid POD_LIMIT: %v", err))
+	}
+
+	// 対象ノード上のsaikiネームスペースに属するポッド数をカウント
+	count := 0
+	for _, p := range nodeInfo.Pods {
+		if p.Pod.Namespace == "saiki" {
+			count++
+		}
+	}
+
+	// ネームスペース内のポッド数がリミット値以上の場合、ノードを制限
+	if count >= podLimit {
+		klog.Infof("Node %s is unschedulable: number of pods in 'saiki' namespace on the node (%d) exceeds the limit (%d)", nodeInfo.Node().Name, count, podLimit)
+		return framework.NewStatus(framework.UnschedulableAndUnresolvable, "Number of pods in namespace on the node exceeds limit")
+	}
+
 	return framework.NewStatus(framework.Success)
 }
 

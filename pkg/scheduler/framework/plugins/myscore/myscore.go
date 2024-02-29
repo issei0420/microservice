@@ -59,7 +59,7 @@ func (pl *MyScorePlugin) Score(ctx context.Context, state *framework.CycleState,
 
 	// Prometheus クエリの構築
 	baseURL := "http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query"
-	queryParams := fmt.Sprintf("topk(5, sum(rate(request_total{app=\"%s\", namespace=\"saiki\", dst_service!=\"redis-cart\", dst_service!=\"otel-collector-collector\", dst_service!=\"jaeger\", dst_service!=\"prometheus-kube-prometheus-prometheus\", dst_service!=\"\"}[30m])) by (dst_service) OR sum(rate(request_total{dst_service=\"%s\", namespace=\"saiki\", app!=\"redis-cart\", app!=\"otelcollector\", app!=\"jaeger\", app!=\"\"}[30m])) by (app))", sn, sn)
+	queryParams := fmt.Sprintf("topk(5, sum(rate(request_total{app=\"%s\", namespace=\"saiki\", dst_service!=\"redis-cart\", dst_service!=\"otel-collector-collector\", dst_service!=\"jaeger\", dst_service!=\"prometheus-kube-prometheus-prometheus\", dst_service!=\"\"}[5m])) by (dst_service) OR sum(rate(request_total{dst_service=\"%s\", namespace=\"saiki\", app!=\"redis-cart\", app!=\"otelcollector\", app!=\"jaeger\", app!=\"\"}[5m])) by (app))", sn, sn)
 
 	// クエリ文字列のエンコード
 	encodedQuery := url.QueryEscape(queryParams)
